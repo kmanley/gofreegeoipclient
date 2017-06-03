@@ -3,31 +3,39 @@ package gofreegeoipclient
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
-type Country struct {
-	Ip           string
-	Country_code string
-	Country_name string
-	Region_code  string
-	Region_name  string
-	City         string
-	Zipcode      string
-	Latitude     int
-	Longitude    int
-	Metro_code   string
-	Area_code    string
+type Location struct {
+	IP          string  `json:"ip"`
+	CountryCode string  `json:"country_code"`
+	CountryName string  `json:"country_name"`
+	RegionCode  string  `json:"region_code"`
+	RegionName  string  `json:"region_name"`
+	City        string  `json:"city"`
+	ZipCode     string  `json:"zip_code"`
+	TimeZone    string  `json:"time_zone"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	MetroCode   int     `json:"metro_code"`
 }
 
-func GetCountryForIP(ip string) (Country, error) {
-	res, err := http.Get("https://freegeoip.net/json/" + ip)
+type Locator struct {
+	Timeout time.Duration
+}
+
+func (locator Locator) Locate(ip string) (Location, error) {
+	client := http.Client{
+		Timeout: locator.Timeout,
+	}
+	res, err := client.Get("https://freegeoip.net/json/" + ip)
 	if err != nil {
-		return Country{}, err
+		return Location{}, err
 	}
-	var c Country
+	var ret Location
 	decoder := json.NewDecoder(res.Body)
-	if err := decoder.Decode(&c); err != nil {
-		return Country{}, err
+	if err := decoder.Decode(&ret); err != nil {
+		return Location{}, err
 	}
-	return c, nil
+	return ret, nil
 }

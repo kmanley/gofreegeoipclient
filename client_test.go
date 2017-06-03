@@ -1,12 +1,21 @@
 package gofreegeoipclient
 
-import "testing"
+import (
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+)
 
 func TestGetCountryForIP(t *testing.T) {
-	if country, _ := GetCountryForIP("92.50.115.170"); country.Country_code != "DE" {
-		t.Errorf("GetCountryForIP(%v) = %v, want %v", "92.50.115.170", country.Country_code, "DE")
+	client := Locator{10 * time.Second}
+
+	if ret, err := client.Locate("92.50.115.170"); ret.CountryCode != "DE" {
+		t.Errorf("Locate(%v) = %v, want %v, err=%v", "92.50.115.170", ret.CountryCode, "DE", err)
+	} else {
+		spew.Dump(ret)
 	}
-	if country, err := GetCountryForIP("92.50.115.a"); err == nil {
-		t.Errorf("GetCountryForIP(%v) = %v, want %v", "92.50.115.a", country, nil)
+	if ret, err := client.Locate("92.50.115.a"); err == nil {
+		t.Errorf("Locate(%v) = %v, want %v", "92.50.115.a", ret, nil)
 	}
 }
